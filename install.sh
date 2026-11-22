@@ -58,8 +58,26 @@ fi
 
 PIN="$(python3 -c 'import secrets; print(secrets.token_urlsafe(15))')"
 printf '%s\n' "$PIN" > "$DATA_DIR/web.pin"
-chown "$APP_USER:$APP_USER" "$DATA_DIR/web.pin"
+chown -R "$APP_USER:$APP_USER" "$DATA_DIR"
+chmod 0700 "$DATA_DIR"
 chmod 0600 "$DATA_DIR/web.pin"
+
+PORT="$(python3 - <<'PY'
+import socket
+for port in range(8765, 8800):
+    sock = socket.socket()
+    try:
+        sock.bind(("0.0.0.0", port))
+    except OSError:
+        continue
+    else:
+        print(port)
+        sock.close()
+        break
+else:
+    raise SystemExit("No free setup port found between 8765 and 8799.")
+PY
+)"
 
 cat > /etc/systemd/system/unfollow-checker.service <<UNIT
 [Unit]
@@ -74,7 +92,7 @@ Group=$APP_USER
 WorkingDirectory=$APP_DIR
 Environment=DATA_DIR=$DATA_DIR
 Environment=HOST=0.0.0.0
-Environment=PORT=8765
+Environment=PORT=$PORT
 Environment=PYTHONDONTWRITEBYTECODE=1
 ExecStart=/usr/bin/python3 $APP_DIR/app.py
 Restart=always
@@ -96,14 +114,16 @@ if systemctl list-unit-files twitch-follow-watch.service --no-legend 2>/dev/null
   systemctl disable --now twitch-follow-watch.service || true
 fi
 systemctl daemon-reload
-systemctl enable --now unfollow-checker.service
+systemctl enable unfollow-checker.service
+systemctl reset-failed unfollow-checker.service || true
+systemctl restart unfollow-checker.service
 sleep 2
 
 IP="$(hostname -I | awk '{print $1}')"
 echo
 echo "Unfollow Checker is installed and starts automatically after reboot."
-echo "Open on this Pi: http://localhost:8765"
-echo "Open from another device on your home network: http://${IP:-raspberrypi.local}:8765"
+echo "Open on this Pi: http://localhost:$PORT"
+echo "Open from another device on your home network: http://${IP:-raspberrypi.local}:$PORT"
 echo "Setup PIN: $PIN"
 echo "Keep the PIN private and use the page only on a trusted local network."
 echo "Status: sudo systemctl status unfollow-checker.service"

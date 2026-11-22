@@ -35,7 +35,7 @@ sudo ./install.sh
 
 Der Installer richtet den systemd-Dienst ein, aktiviert den Autostart und zeigt eine einmalige Einrichtungs-PIN an. Die PIN für die Weboberfläche notieren.
 
-Öffne dann im Browser entweder auf dem Pi `http://localhost:8765` oder auf einem Gerät im selben Heimnetz die vom Installer angezeigte Adresse, zum Beispiel `http://192.168.178.36:8765`. Gib die PIN ein.
+Öffne dann im Browser entweder auf dem Pi die vom Installer angezeigte `localhost`-Adresse oder auf einem Gerät im selben Heimnetz die dort angezeigte Netzwerkadresse. Der Installer sucht automatisch einen freien Port ab `8765`. Gib die angezeigte PIN ein.
 
 ## Einrichtung im Browser
 
@@ -49,7 +49,7 @@ Für den Kanalzugriff wird `moderator:read:followers` angefordert. Zum Schreiben
 
 ## Zugriff auf die Weboberfläche
 
-Der Webserver lauscht standardmäßig im lokalen Netzwerk auf Port `8765`. Die Einrichtung kann daher auf dem Pi selbst oder von einem anderen Gerät im selben Netzwerk erfolgen.
+Der Webserver lauscht im lokalen Netzwerk auf einem freien Port ab `8765`. Die Einrichtung kann daher auf dem Pi selbst oder von einem anderen Gerät im selben Netzwerk erfolgen.
 
 Die PIN schützt die Oberfläche. Verwende sie nur in einem vertrauenswürdigen Heimnetz und richte keine Router-Portweiterleitung aus dem Internet auf Port 8765 ein. Die lokale Weboberfläche nutzt HTTP; ein Gerät mit Zugriff auf das lokale Netzwerk könnte Datenverkehr mitlesen. Die eigentlichen OAuth-Tokens werden vom Pi direkt mit Twitch ausgetauscht und nicht an den Browser zurückgegeben.
 
